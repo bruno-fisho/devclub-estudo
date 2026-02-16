@@ -31,20 +31,29 @@ app.put("/users/:id", async (req, res) => {
 });
 
 app.get("/users", async (req, res) => {
+  if (req.query.id) {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: parseInt(req.query.id),
+      },
+    });
+    res.status(200).json(user);
+  }
   const users = await prisma.user.findMany();
   res.status(200).json(users);
 });
 
-app.get("/users/:id", async (req, res) => {
-  const user = await prisma.user.findUnique({
+app.put("/users/:id", async (req, res) => {
+  await prisma.user.update({
     where: {
       id: parseInt(req.params.id),
     },
+    data: {
+      name: req.body.name,
+      age: req.body.age,
+    },
   });
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-  res.status(200).json(user);
+  res.status(201).json({ message: "User updated successfully" });
 });
 
 app.get("/home", (req, res) => {
